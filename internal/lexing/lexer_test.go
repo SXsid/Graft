@@ -6,20 +6,21 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	input := `print("hello") 42 {x}`
+	input := `print("hello") 42 {x} @`
 
 	expected := []Token{
-		{Kind: Identifier, val: "print"},
-		{Kind: Bracket, val: "("},
-		{Kind: String, val: `"hello"`},
-		{Kind: Bracket, val: ")"},
-		{Kind: Digit, val: "42"},
-		{Kind: Bracket, val: "{"},
-		{Kind: Identifier, val: "x"},
-		{Kind: Bracket, val: "}"},
+		{Kind: Identifier, Val: "print"},
+		{Kind: Bracket, Val: "("},
+		{Kind: String, Val: "hello"},
+		{Kind: Bracket, Val: ")"},
+		{Kind: Digit, Val: "42"},
+		{Kind: Bracket, Val: "{"},
+		{Kind: Identifier, Val: "x"},
+		{Kind: Bracket, Val: "}"},
+		{Kind: Error, Val: "@", Pos: 22},
 	}
 
-	tokens := Parser(input)
+	tokens := Tokenizer(input)
 
 	if !reflect.DeepEqual(tokens, expected) {
 		t.Errorf("Tokens mismatch.\nGot:      %#v\nExpected: %#v", tokens, expected)

@@ -19,3 +19,7 @@ func IsBracket(r rune) bool {
 func IsQuote(r rune) bool {
 	return r == '"' || r == '\''
 }
+
+func IsOperator(r rune) bool {
+	return r == '='
+}

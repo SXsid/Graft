@@ -9,14 +9,18 @@ const (
 	Digit      Kind = "digit"
 	String     Kind = "stirng"
 	Identifier Kind = "ident"
+	Error      Kind = "error"
+	Assignment Kind = "assignment"
+	Equate     Kind = "equate"
 )
 
 type Token struct {
 	Kind Kind
-	val  string
+	Val  string
+	Pos  int
 }
 
-func Parser(data string) []Token {
+func Tokenizer(data string) []Token {
 	var token []Token
 	runes := []rune(data)
 	// we need to control the flow of cursor
@@ -25,8 +29,8 @@ func Parser(data string) []Token {
 		switch {
 		case helper.IsBracket(r):
 			token = append(token, Token{
-				Bracket,
-				string(r),
+				Kind: Bracket,
+				Val:  string(r),
 			})
 			i++
 		case helper.IsWhitespace(r):
@@ -39,22 +43,21 @@ func Parser(data string) []Token {
 			}
 			token = append(token, Token{
 				Kind: Digit,
-				val:  string(runes[start:i]),
+				Val:  string(runes[start:i]),
 			})
 		case helper.IsQuote(r):
-			start := i
 			i++ // skip the quteo
+			start := i
 			// we need to match the exact quopte
 			quote := r
 			for i < len(runes) && runes[i] != quote {
 				i++
 			}
-			// count the quote too
-			i++
 			token = append(token, Token{
 				Kind: String,
-				val:  string(runes[start:i]),
+				Val:  string(runes[start:i]),
 			})
+			i++
 		case helper.IsLetter(r):
 			start := i
 			for i < len(runes) && (helper.IsLetter(runes[i]) || helper.IsDigit(runes[i])) {
@@ -62,9 +65,29 @@ func Parser(data string) []Token {
 			}
 			token = append(token, Token{
 				Kind: Identifier,
-				val:  string(runes[start:i]),
+				Val:  string(runes[start:i]),
 			})
+		case helper.IsOperator(r):
+
+			if i+1 < len(runes) && helper.IsOperator(runes[i+1]) {
+				token = append(token, Token{
+					Kind: Equate,
+					Val:  string(runes[i : i+2]),
+				})
+				i += 2
+			} else {
+				i++
+				token = append(token, Token{
+					Kind: Assignment,
+					Val:  string(r),
+				})
+			}
 		default:
+			token = append(token, Token{
+				Kind: Error,
+				Val:  string(r),
+				Pos:  i,
+			})
 			i++
 
 		}
